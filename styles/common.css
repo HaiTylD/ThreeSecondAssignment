@@ -1,0 +1,21 @@
+body {
+    background-color: #E5F5FF;
+}
+h1 {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+h2 {
+    border-bottom: 1px solid black;
+}
+h3 {
+    border-bottom: 1px solid black;
+}
+#div1 {
+    float:right;
+    background-color:#E7E8E9;
+    width: 450px;
+    border:1px solid;
+    text-align:center;
+}
+
