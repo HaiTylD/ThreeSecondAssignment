@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three Second Game</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link href="styles/c3.css" rel="stylesheet">
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles/common1.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="styles/d3.v5.min.js" charset="utf-8"></script>
+    <script src="styles/c3.min.js"></script>
+</head>
+<body>
+<button onclick="startButton()" id="buttonOne" class="startButton">Start</button>
+<div id="timerDisplay"></div>
+<div id="attemptNum"></div>
+<div id="stats"></div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col text-center">
+            <button onclick="viewStats()" class="btn btn-primary">View Summary</button>
+            <table id="summaryTable" style="display:none;">
+                <thead>
+                <tr>
+                    <th scope="col">Attempt</th>
+                    <th scope="col">Min Time</th>
+                    <th scope="col">Max Time</th>
+                    <th scope="col">Average Time</th>
+                    <th scope="col">Elapsed Time</th>
+                </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="chart"></div>
+</body>
+<script>
+    let startTime, endTime, timerInterval;
+    let attempts = [];
+    let attemptNumber = 0;
+
+    const buttonOne = document.getElementById("buttonOne");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const statsTableBody = document.getElementById("statsTableBody");
+    const summaryTable = document.getElementById("summaryTable");
+
+    function startButton() {
+        if (buttonOne.innerHTML === "Start") {
+            buttonOne.innerHTML = "Stop";
+            buttonOne.classList.remove("one", "two", "three", "none");
+            buttonOne.classList.add("startButton");
+            startTime = new Date().getTime();
+            attemptNumber++;
+        } else {
+            buttonOne.innerHTML = "Start"
+            endTime = new Date().getTime();
+            clearInterval(timerInterval);
+            getResult();
+            time();
+            attemptStore();
+            getStats();
+            resultChart();
+        }
+    }
+    function time() {
+        const currentTime = new Date().getTime();
+        const elapsedTime = (currentTime - startTime) / 1000;
+
+        if (elapsedTime >= 2.95 && elapsedTime <= 3.05) {
+            buttonOne.classList.remove("startButton", "one", "two", "none");
+            buttonOne.classList.add("three");
+        } else if (elapsedTime >= 2.8 && elapsedTime <= 3.2) {
+            buttonOne.classList.remove("startButton", "one", "three", "none");
+            buttonOne.classList.add("two");
+        } else if (elapsedTime >= 2.5 && elapsedTime <= 3.5) {
+            buttonOne.classList.remove("startButton", "two", "three", "none");
+            buttonOne.classList.add("one");
+        } else {
+            buttonOne.classList.remove("one", "two", "three");
+            buttonOne.classList.add("none");
+        }
+    }
+    function getResult() {
+        const elapsedTime = (endTime - startTime) / 1000;
+        timerDisplay.innerHTML = `Elapsed time: ${elapsedTime.toFixed(2)} seconds`;
+    }
+    function attemptStore() {
+        const elapsedTime = (endTime - startTime) / 1000;
+        attempts.push(elapsedTime);
+    }
+    function getStats() {
+        const minTime = Math.min(...attempts).toFixed(2);
+        const maxTime = Math.max(...attempts).toFixed(2);
+        const avgTime = (attempts.reduce((acc, curr) => acc + curr, 0) / attempts.length).toFixed(2);
+        const elapsedTime = (endTime - startTime) / 1000;
+
+        const newRow = `<tr><td>${attemptNumber}</td><td>${minTime}</td><td>${maxTime}</td><td>${avgTime}</td><td>${elapsedTime.toFixed(2)}</td></tr>`;
+        statsTableBody.innerHTML += newRow;
+    }
+    function viewStats() {
+        if (summaryTable.style.display === "none") {
+            summaryTable.style.display = "block";
+        } else {
+            summaryTable.style.display = "none";
+        }
+    }
+    var chart = c3.generate({
+        bindto: '#chart',
+        data: {
+            columns: [
+                ['Attempt', 1],
+                ['Elapsed Time', 0]
+            ]
+        }
+    })
+
+    function resultChart() {
+        const attemptTry = ['Attempt', ...Array.from({ length: attempts.length }, (_, i) => i + 1)];
+        const elapsedTimes = ['Elapsed Time', ...attempts];
+
+        chart.load ({
+            columns: [
+                attemptTry,
+                elapsedTimes
+            ]
+        })
+    }
+</script>
+</html>
